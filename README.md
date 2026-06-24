@@ -173,16 +173,3 @@ In the optional phase, a simple Python script may be written to read the capture
 * HTTP status codes
 
 This phase is optional and is done for extra credit.
-
-## Responsibility Matrix
-
-| Member       | Responsibility                                                      |
-| ------------ | ------------------------------------------------------------------- |
-| Diako Masodi | Repository setup, packet capture, Wireshark analysis, documentation |
-
-## Current Status
-
-* GitHub repository has been created.
-* Project folders have been created.
-* Initial README file has been written.
-* Packet capturing and analysis will be done in the next phases.
