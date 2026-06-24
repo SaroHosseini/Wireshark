@@ -2,174 +2,175 @@
 
 ## Project Information
 
-This repository contains the final project for the Computer Networks course.
+This project is for the Computer Networks course.
 
-The goal of this project is to analyze web traffic using standard networking tools such as Wireshark and curl. In this project, HTTP traffic is generated with curl, captured with Wireshark, and then analyzed layer by layer based on the TCP/IP protocol stack.
+The goal of this project is to capture and analyze HTTP traffic using **Wireshark** and **curl**. In this project, a simple HTTP request was sent from the client system to a web server, and the captured packets were analyzed based on the TCP/IP protocol stack.
 
 ## Student Information
 
 * **Name:** Saro Hosseini
 * **Course:** Computer Networks
-* **Instructor:** Dr. Saadoun Azizi
 * **Project Topic:** HTTP/TCP/IP Traffic Analysis using Wireshark and curl
-
-## Project Goal
-
-The main purpose of this project is to understand what happens behind the scenes when a client sends an HTTP request to a web server.
-
-In normal usage, the user only sees the final web page or the server response. However, at the network level, several packets are exchanged between the client and the server. This project captures and analyzes those packets in order to understand the behavior of the HTTP, TCP, and IP protocols.
 
 ## Tools Used
 
-* **Wireshark:** Used to capture and analyze network packets.
-* **curl:** Used to send simple HTTP requests from the terminal.
-* **Git and GitHub:** Used for version control and project submission.
-* **Python:** Used for the optional automation phase.
-
-## Why curl is Used Instead of a Browser
-
-Modern browsers usually redirect HTTP traffic to HTTPS automatically. Since HTTPS traffic is encrypted, the HTTP headers and methods cannot be clearly seen in Wireshark.
-
-For this reason, curl is used in this project. It allows us to send simple and clear HTTP requests without extra browser behavior.
-
-Example command:
-
-```bash
-curl http://neverssl.com
-```
-
-## Why HTTP Websites are Used
-
-In this project, websites that support plain HTTP are used so that the HTTP request and response can be visible in Wireshark.
-
-Example target websites:
-
-```text
-http://example.com
-http://neverssl.com
-http://httpbin.org/ip
-http://httpbin.org/status/404
-```
+* Wireshark
+* curl
+* Python
+* Scapy
+* Git / GitHub
 
 ## Project Structure
 
 ```text
 Wireshark/
 ├── captures/
+│   └── phase1_http_nevrssl.pcapng
 ├── screenshots/
-├── notes/
+│   ├── get_request_packet.png
+│   ├── http_response_packet.png
+│   └── rtt_analysis.png
 ├── scripts/
-└── README.md
+│   └── pcap_http_summary.py
+├── README.md
+├── requirement.txt
+└── .gitignore
 ```
 
-## Folder Description
+## Phase 1: Packet Capture
 
-### captures
+In this phase, Wireshark was used to capture HTTP traffic.
 
-This folder contains the captured Wireshark traffic files.
+The following command was executed in the terminal:
 
-The captured files are saved in `.pcap` or `.pcapng` format. These files are required because screenshots alone are not enough for project submission.
+```bash
+curl -4 --http1.1 http://neverssl.com
+```
 
-### screenshots
+This command sends a plain HTTP request to the `neverssl.com` web server.
 
-This folder contains screenshots taken from Wireshark.
+HTTP was used instead of HTTPS because HTTPS traffic is encrypted and HTTP headers cannot be clearly viewed in Wireshark.
 
-The screenshots will show important packets and fields such as:
-
-* HTTP GET request
-* HTTP response
-* Source and destination IP addresses
-* Source and destination ports
-* HTTP headers
-* Status code
-* Delta Time or RTT
-
-### notes
-
-This folder contains temporary notes and explanations written during the project.
-
-### scripts
-
-This folder is used for the optional phase of the project.
-
-If the optional automation part is implemented, the Python script for analyzing captured packets will be placed in this folder.
-
-## Project Phases
-
-## Phase 1: Environment Setup and Packet Capture
-
-In this phase, Wireshark is opened and the active network interface is selected. Then, curl is used to generate HTTP traffic.
-
-After receiving the response in the terminal, the capture process is stopped and the captured packets are saved in `.pcapng` format.
-
-Expected output of this phase:
+The captured traffic was saved in this file:
 
 ```text
-captures/phase1_http_capture.pcapng
+captures/phase1_http_nevrssl.pcapng
 ```
 
-## Phase 2: Header and Protocol Stack Analysis
+## Phase 2: HTTP GET Request Analysis
 
-In this phase, the captured packets are filtered in Wireshark using display filters such as:
-
-```text
-http
-```
-
-or:
-
-```text
-tcp.port == 80
-```
-
-Then, the first HTTP GET request is selected and analyzed.
-
-The following information will be extracted:
+The HTTP GET request packet was found and analyzed in Wireshark.
 
 ### Application Layer
 
-* HTTP method
-* Host
-* HTTP version
-* User-Agent
+| Field        | Value        |
+| ------------ | ------------ |
+| HTTP Method  | GET          |
+| Request URI  | /            |
+| HTTP Version | HTTP/1.1     |
+| Host         | neverssl.com |
+| User-Agent   | curl/8.16.0  |
+
+At the application layer, the client sends a GET request to the server. The `Host` field shows the target website, and the `User-Agent` field shows that the request was generated by curl.
 
 ### Transport Layer
 
-* Transport protocol
-* Source port
-* Destination port
+| Field            | Value    |
+| ---------------- | -------- |
+| Protocol         | TCP      |
+| Source Port      | 9446     |
+| Destination Port | 80       |
+| TCP Flags        | PSH, ACK |
+
+The destination port is `80`, which is the default port for HTTP traffic.
+
+The source port `9446` is a temporary port selected by the operating system for this connection.
 
 ### Network Layer
 
-* Source IP address
-* Destination IP address
+| Field          | Value         |
+| -------------- | ------------- |
+| Source IP      | 192.168.1.3   |
+| Destination IP | 34.223.124.45 |
+| IP Version     | IPv4          |
+
+The source IP is the local IP address of the client system, and the destination IP is the server IP address.
 
 ## Phase 3: Server Response and RTT Analysis
 
-In this phase, the server response packet is analyzed.
+The server response packet was analyzed in Wireshark.
 
-The following information will be extracted:
+The response shows that the server received the HTTP request and sent back an HTTP response.
 
-* HTTP status code
-* Meaning of the status code
-* Delta Time between the HTTP request and the first server response
-* Approximate RTT analysis
+The approximate response delay was calculated using the time difference between the HTTP GET request and the first response data from the server:
 
-If the delay is high, possible reasons will be discussed, such as:
+```text
+1.525109300 - 1.265250500 = 0.25 seconds
+```
 
-* Client-side network problem
-* Low bandwidth
-* Network congestion
-* Server-side processing delay
-* Long physical or routing distance between client and server
+Approximate RTT:
 
-## Phase 4: Optional Automation
+```text
+0.260 seconds
+```
 
-In the optional phase, a simple Python script may be written to read the captured packet file and print a summary of useful information such as:
+This means the first response data was received about 260 milliseconds after the HTTP GET request was sent.
 
-* Source IP
-* Destination IP
-* HTTP packets
-* HTTP status codes
+If this delay were more than 2 seconds, possible reasons could include network congestion, low bandwidth, routing delay, client-side connection problems, or slow server-side processing.
 
-This phase is optional and is done for extra credit.
+## Phase 4: Optional Python Script
+
+A simple Python script was created to analyze the captured packet file.
+
+Script path:
+
+```text
+scripts/pcap_http_summary.py
+```
+
+The script reads the capture file and prints a simple summary of HTTP packets, including:
+
+* HTTP request line
+* Host
+* User-Agent
+* Source IP and port
+* Destination IP and port
+* HTTP response status line, if available
+
+To run the script:
+
+```bash
+python scripts/pcap_http_summary.py captures/phase1_http_nevrssl.pcapng
+```
+
+## Screenshots
+
+### HTTP GET Request
+
+```text
+screenshots/get_request_packet.png
+```
+
+This screenshot shows the HTTP GET request packet and important fields such as Host, User-Agent, source IP, destination IP, source port, and destination port.
+
+### HTTP Response
+
+```text
+screenshots/http_response_packet.png
+```
+
+This screenshot shows the HTTP response packet from the server.
+
+### RTT Analysis
+
+```text
+screenshots/rtt_analysis.png
+```
+
+This screenshot shows the packets used to calculate the approximate response delay.
+
+## Conclusion
+
+In this project, HTTP traffic was generated using curl and captured using Wireshark. The captured packets were analyzed across the application, transport, and network layers.
+
+This project helped show how an HTTP request is sent from a client to a server, how TCP ports are used, how IP addresses identify the source and destination, and how response delay can be measured using packet timestamps.
